@@ -1,0 +1,41 @@
+#!/usr/bin/python
+
+# Import necessary libraries
+import urllib3
+import certifi
+import re
+import pandas as pd
+
+# Fetch URL for scraping
+url = 'https://www.metacritic.com/browse/movies/score/metascore/year/filtered?year_selected=2012&sort=desc&view=detailed'
+
+# Construct python request pool
+http = urllib3.PoolManager(ca_certs=certifi.where())
+
+# Initiate web request
+r = http.request('GET', url, headers={'User-Agent': 'Mozilla/5.0'})
+
+# Convert result to text
+datastring = str(r.data, 'utf-8')
+
+# Capture titles
+titles = re.findall('class="title"><h3>(.+)</h3>', datastring)
+
+# Capture release dates
+reldates = re.findall('<span>(.+)</span>', datastring)
+
+# Capture description of the movie
+descr = re.findall('<div class="summary">\s+(.+)\s+', datastring)
+
+# Capture metascore of the movie
+metascore = re.findall('<div class="clamp-score-wrap">\s*.*\s<div class="metascore_w large movie positive">(\d+)', datastring)
+
+# Capture photo URL
+photo_url = re.findall(' <a href=".*<img\ssrc="(https.*)" alt', datastring)
+
+# Convert the data into a DataFrame
+df = pd.DataFrame(list(zip(titles, reldates, descr, metascore, photo_url)),
+                  columns=['Title', 'Release Date', 'Description of the Movie', 'Metascore', 'Photo URL'])
+
+# Check result
+print(df)
