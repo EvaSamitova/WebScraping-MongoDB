@@ -1,0 +1,16 @@
+My project Goal: Gather data from the website metacritic.com for popular movies with https://regex101.com
+
+# 1. Title
+<div class="title"><h3>(.*?)</h3>
+
+# 2. Release Date
+<span class="release-date">(.+?)</span>
+
+# 3. Description
+<div class="summary">[\s\S]+?<p>(.*?)</p>
+
+# 4. Metascore
+<div class="score-container">.+?<div class="metascore">(\d+)</div>
+
+# 5. Photo URL
+<td class="image-wrapper">.+?<img src="(https?://.*?)"
