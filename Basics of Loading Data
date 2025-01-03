@@ -1,0 +1,57 @@
+DA 320
+Assignment: Basics of Loading Data
+Source: base of code provided by Professor Spence - https://github.com/tspence/data-analysis-class-resources/blob/main/jupyter/Basics%20of%20Loading%20Data.ipynb
+import json
+
+# Demonstration of how to load a file that contains secrets without accidentally leaking those secrets
+with open('/Users/eva/Desktop/Fall 2024/DA320/Password MongoDB/credentials.json') as f:
+    data = json.load(f)
+
+    # If you want your data to be secure, don't print this variable out!
+    # Jupyter will retain a cached version of any printed data and it can be
+    # accidentally committed to version control.
+secret_key = data['mongodb']
+
+# We can safely print the length of the secret key. That won't leak any sensitive information.
+print(f"My secret key is {len(secret_key)} characters in length.")
+
+import pymongo
+import certifi
+
+# Connect to the database using known good certificates
+client = pymongo.MongoClient(secret_key, tlsCAFile=certifi.where())
+
+# Fetch the database named "DA-320"
+da320_database = client['DA-320']
+
+# Within the database we have "collections". Think of them as tables in SQL.
+allCollections = da320_database.list_collection_names()
+
+# Here is the list of collections within my database
+print(f"Using MongoDB version {client.server_info()['version']}.")
+print(f"This database has the collections {allCollections}")
+
+# Retrieve all records from a collection - this can be a large amount of data!
+cursor = da320_database["imdb"].find()
+
+# Convert this information into a Pandas dataframe
+imdb = pd.DataFrame(cursor)
+
+# Make sure we've read the information correctly
+imdb.head()
+
+# Transform and standardize the columns
+imdb.release_date=pd.to_datetime(imdb.release_date,errors = 'coerce')
+imdb.budget = pd.to_numeric(imdb.budget, errors='coerce')
+imdb.runtime=pd.to_numeric(imdb.runtime,errors='coerce')
+# cheking result
+imdb.head()
+
+Plotting Runtime against Release date
+pyplot.title('Runtime distribution VS Release Date')
+pyplot.xlabel('Release Date')
+pyplot.ylabel('Runtime')
+pyplot.scatter(imdb['release_date'], imdb['runtime'])
+pyplot.show()
+
+Reference - https://medium.com/codex/practical-data-analytics-for-movies-89f44d04712d
